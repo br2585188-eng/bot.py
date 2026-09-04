@@ -1,40 +1,22 @@
 import os
-from threading import Thread
 import discord
 from discord.ext import commands
-from flask import Flask
 
-# ==================== KEEP ALIVE WEB SERVER ====================
-app = Flask("")
-
-
-@app.route("/")
-def home():
-    return "FROST LOUNGE Bot is online 24/7!"
-
-
-def run_flask():
-    app.run(host="0.0.0.0", port=8080)
-
-
-def keep_alive():
-    t = Thread(target=run_flask)
-    t.start()
-
-
-# ==================== DISCORD BOT SETUP ====================
+# Bot Intents Setup
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-# Configuration IDs
-WELCOME_CHANNEL_ID = 1543189838184972298
-RULES_CHANNEL_ID = 1543189838184972298
-ROLES_CHANNEL_ID = 1539213689847029760
-INFO_CHANNEL_ID = 1539213942994501722
+# ==================== CONFIGURATION ====================
+WELCOME_CHANNEL_ID = 1543189838184972298  # Welcome Channel ID
+RULES_CHANNEL_ID = 1543189838184972298    # Rules Channel ID
+ROLES_CHANNEL_ID = 1539213689847029760    # Self-Roles Channel ID
+INFO_CHANNEL_ID = 1539213942994501722     # Announcement / Info Channel ID
 
+IMAGE_FILE = "banner.gif"
+# ========================================================
 
 @bot.event
 async def on_ready():
@@ -42,7 +24,6 @@ async def on_ready():
     await bot.change_presence(
         activity=discord.Game(name="FROST LOUNGE ™ | !help")
     )
-
 
 @bot.event
 async def on_member_join(member):
@@ -55,15 +36,19 @@ async def on_member_join(member):
         return
 
     if channel:
-        file = discord.File("banner.png", filename="banner.png")
+        # Local Image Attachment Setup (banner.gif)
+        file = discord.File(IMAGE_FILE, filename=IMAGE_FILE)
 
+        # Main Embed Setup
         embed = discord.Embed(color=discord.Color.from_rgb(155, 89, 182))
-
+        
+        # Author Header
         embed.set_author(
             name=f"Welcome to {member.guild.name} || Hangout • Chilling • Socialize • Gaming",
-            icon_url=member.guild.icon.url if member.guild.icon else None,
+            icon_url=member.guild.icon.url if member.guild.icon else None
         )
 
+        # Title & Bullet Points
         embed.title = "__WELCOME TO FROST LOUNGE ™__"
         embed.description = (
             f"╭─ Checkout - <#{RULES_CHANNEL_ID}>\n"
@@ -72,13 +57,14 @@ async def on_member_join(member):
             f"🐷 have a good journey with us 👼"
         )
 
-        embed.set_image(url="attachment://banner.png")
+        # Attach image dynamically
+        embed.set_image(url=f"attachment://{IMAGE_FILE}")
+
+        # Mention Header Text
         top_text = f"HEY {member.mention} **WELCOME** 💖"
 
+        # Send message
         await channel.send(content=top_text, file=file, embed=embed)
 
-
-# Start Keep-Alive Server & Bot safely via Environment Variable
-keep_alive()
-TOKEN = os.getenv("DISCORD_TOKEN")
-bot.run(TOKEN)
+# Render Environment Variable se Token automatic pull karne ke liye
+bot.run(os.getenv("DISCORD_TOKEN"))
